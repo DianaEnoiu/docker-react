@@ -2,27 +2,34 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main
+      - express
  
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
-      - run: docker run -e CI=true cygnetops/react-test npm test
+      - name: Setup NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: NPM install
+        run: |
+          npm install 
+      - name: NPM Run Build
+        run: |
+          npm run build
  
       - name: Generate deployment package
-        run: zip -r deploy.zip . -x '*.git*'
+        run: zip -r deploy.zip . -x '*.git*' 'node_modules'
  
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v18
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: docker-react
-          environment_name: Dockerreact-env
+          application_name: express-frontend
+          environment_name: express-frontend-env
           existing_bucket_name: elasticbeanstalk-eu-west-2-735504675342
           region: eu-west-2
           version_label: ${{ github.sha }}
