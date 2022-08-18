@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        run: ls -al
+      - run: ls -al
       - name: Setup NPM
         uses: actions/setup-node@v3
         with:
